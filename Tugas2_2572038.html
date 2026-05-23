@@ -1,0 +1,231 @@
+<!--2572038 - Steven Evan Winardi-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDoList - 2572038</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <style>
+        body {
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px lightgrey;
+            margin: auto;
+        }
+
+        .input-group {
+            margin-bottom: 5px;
+        }
+
+        input {
+            width: 70%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 6px 12px;
+            cursor: pointer;
+            border: none;
+            color: white;
+            border-radius: 4px;
+        }
+
+        #btnTambah {
+            background: #28a745;
+            padding: 8px 12px;
+        }
+
+        .danger {
+            color: red;
+            font-weight: bold;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 10px 20px;
+            background: #fff3cd;
+            margin-bottom: 5px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #e9ecef;
+        }
+
+        button {
+            margin-right: 5px;
+        }
+
+        .btn-done {
+            background-color: #007bff;
+        }
+
+        .btn-edit, .btn-submit {
+            background-color: #ffff00;
+            color: black;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+        }
+
+        h3 {
+            margin-top: 30px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        footer {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .tercoret {
+            text-decoration: line-through;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>My To Do List</h2>
+
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="Tambah tugas..." maxlength="20">
+            <button id="btnTambah">Tambah</button>
+        </div>
+
+        <h3>Belum Selesai</h3>
+        <ul id="taskList">
+        </ul>
+
+        <h3>Sudah Selesai (Riwayat)</h3>
+        <table id="completedTable">
+            <thead>
+                <tr>
+
+                    <th>Nama Tugas</th>
+                    <th style="width: 100px;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <footer>
+        <strong>&copy; 2026 [2572038] - [Steven Evan Winardi]. All rights reserved.</strong>
+    </footer>
+
+    <script>
+        $(document).ready(function () {
+            $("#btnTambah").click(function () {
+                const taskText = $.trim($("#taskInput").val());
+                if (taskText === "") {
+                    alert("Tugas tidak boleh kosong!");
+                    return;
+                }
+
+                const newLi = $("<li></li>");
+                const textSpan = $("<span></span>").addClass("task-text").text(taskText);
+                newLi.append(textSpan);
+                const actionDiv = $("<div></div>");
+                const btnEdit = $("<button></button>").addClass("btn-edit").text("Edit");
+                const btnDone = $("<button></button>").addClass("btn-done").text("Selesai");
+                actionDiv.append(btnEdit).append(btnDone);
+                newLi.append(actionDiv);
+                $("#taskList").append(newLi);
+                $("#taskInput").val("");
+            });
+
+            $(document).on("click", ".btn-edit", function () {
+                const liElement = $(this).closest("li");
+                const textSpan = liElement.find(".task-text");
+                const currentText = textSpan.text();
+                const editInput = $("<input type='text'>").val(currentText).css("width", "60%");
+                textSpan.replaceWith(editInput);
+                $(this).removeClass("btn-edit").addClass("btn-submit").text("Submit");
+            });
+
+            $(document).on("click", ".btn-submit", function () {
+                const liElement = $(this).closest("li");
+                const editInput = liElement.find("input[type='text']");
+                const updatedText = $.trim(editInput.val());
+                if (updatedText === "") {
+                    alert("Nama tugas hasil perubahan tidak boleh kosong!");
+                    return;
+                }
+
+                const textSpan = $("<span></span>").addClass("task-text").text(updatedText);
+                editInput.replaceWith(textSpan);
+
+                $(this).removeClass("btn-submit").addClass("btn-edit").text("Edit");
+            });
+
+            $(document).on("click", ".btn-done", function () {
+                const liElement = $(this).closest("li");
+
+                let finalTaskText = "";
+                if (liElement.find("input[type='text']").length > 0) {
+                    finalTaskText = $.trim(liElement.find("input[type='text']").val());
+                } else {
+                    finalTaskText = liElement.find(".task-text").text();
+                }
+
+                if (finalTaskText === "") {
+                    alert("Tugas kosong tidak bisa diselesaikan!");
+                    return;
+                }
+
+                const newTr = $("<tr></tr>");
+                const tdText = $("<td></td>").addClass("tercoret").text(finalTaskText);
+
+                const tdAction = $("<td></td>");
+                const btnDelete = $("<button></button>").addClass("btn-delete").text("Hapus");
+                tdAction.append(btnDelete);
+                newTr.append(tdText).append(tdAction);
+                
+                $("#completedTable tbody").append(newTr);
+                liElement.remove();
+            });
+
+            $(document).on("click", ".btn-delete", function () {
+                $(this).closest("tr").remove();
+            });
+        }); 
+    </script>
+</body>
+
+</html>
